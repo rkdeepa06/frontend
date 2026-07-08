@@ -43,10 +43,10 @@ function ccGetUser()  { return localStorage.getItem("username")  || "User"; }
 /* ── Dashboard URL lookup (called from entity subfolders) ── */
 function ccDashboardUrl() {
     const r = ccGetRole();
-    if (r === ROLES.ADMIN)      return "../manage/dashboard.html";
-    if (r === ROLES.PS)         return "../manage/dashboard_problemsetter.html";
-    if (r === ROLES.CONTESTANT) return "../manage/dashboard_contestant.html";
-    return "../loginpage/login.html";
+    if (r === ROLES.ADMIN)      return "dashboard.html";
+    if (r === ROLES.PS)         return "dashboard_problemsetter.html";
+    if (r === ROLES.CONTESTANT) return "dashboard_contestant.html";
+    return "login.html";
 }
 
 /* ── Dashboard URL lookup (called from manage/ folder) ── */
@@ -55,7 +55,7 @@ function ccDashboardUrlLocal() {
     if (r === ROLES.ADMIN)      return "dashboard.html";
     if (r === ROLES.PS)         return "dashboard_problemsetter.html";
     if (r === ROLES.CONTESTANT) return "dashboard_contestant.html";
-    return "../loginpage/login.html";
+    return "login.html";
 }
 
 /* ── Auth guard for entity pages (in subfolders like systemuser/, codingchallenge/) ──
@@ -63,7 +63,7 @@ function ccDashboardUrlLocal() {
    Also sets the Back button href dynamically to the user's own dashboard. ── */
 function requireAuth(allowedRoles) {
     if (!ccGetToken()) {
-        window.location.href = "../loginpage/login.html";
+        window.location.href = "login.html";
         return false;
     }
     const role = ccGetRole();
@@ -81,7 +81,7 @@ function requireAuth(allowedRoles) {
 /* ── Auth guard for dashboard pages (in manage/ folder) ── */
 function requireAuthDashboard(allowedRoles) {
     if (!ccGetToken()) {
-        window.location.href = "../loginpage/login.html";
+        window.location.href = "login.html";
         return false;
     }
     const role = ccGetRole();
@@ -101,8 +101,8 @@ function ccLogout(fromDashboard) {
         localStorage.removeItem("username");
         localStorage.removeItem("role");
         window.location.href = fromDashboard
-            ? "../loginpage/login.html"
-            : "../loginpage/login.html";
+            ? "login.html"
+            : "login.html";
     }
 }
 
