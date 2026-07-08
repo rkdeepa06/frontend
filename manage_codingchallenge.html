@@ -1,0 +1,295 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeCrest | Coding Challenges</title>
+    <link rel="stylesheet" href="main.css">
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 CodeCrest | Coding Challenges</h1>
+        <div class="header-right">
+            <a class="back-btn" href="dashboard.html">← Back to Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="page-title-bar">
+        Managing: <span>Coding Challenges</span>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <h3>💻 Coding Challenges</h3>
+            <div class="ops-row">
+                <button class="action-btn active" id="btn-add" onclick="switchOp('add', this)">➕ Add Challenge</button>
+                <button class="action-btn" id="btn-all" onclick="switchOp('all', this); fetchAll()">📋 View All</button>
+                <button class="action-btn" id="btn-find" onclick="switchOp('find', this)">🔍 Find by ID</button>
+                <button class="action-btn" id="btn-update" onclick="switchOp('update', this)">✏️ Update</button>
+            </div>
+
+            <!-- ADD -->
+            <div class="form-pane active" id="form-add">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>ID</label>
+                        <input type="number" id="cc-add-id" placeholder="Enter ID" />
+                    </div>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="cc-add-title" placeholder="e.g. Two Sum" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="cc-add-desc" rows="3" placeholder="Problem description (min 5 characters)"></textarea>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Difficulty</label>
+                        <select id="cc-add-difficulty">
+                            <option value="EASY">EASY</option>
+                            <option value="MEDIUM">MEDIUM</option>
+                            <option value="HARD">HARD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Base Points</label>
+                        <input type="number" id="cc-add-points" placeholder="e.g. 100" />
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Time Limit (ms)</label>
+                        <input type="number" id="cc-add-timelimit" placeholder="e.g. 2000" />
+                    </div>
+                    <div class="form-group">
+                        <label>Setter ID (User ID)</label>
+                        <input type="number" id="cc-add-setter" placeholder="e.g. 1" />
+                    </div>
+                </div>
+                <button class="btn-submit" onclick="addCodingChallenge()">Save Challenge</button>
+            </div>
+
+            <!-- VIEW ALL -->
+            <div class="form-pane" id="form-all">
+                <div id="table-container"><div class="empty-state">Click "View All" to load data.</div></div>
+            </div>
+
+            <!-- FIND BY ID -->
+            <div class="form-pane" id="form-find">
+                <div class="form-group" style="max-width:300px;">
+                    <label>Challenge ID</label>
+                    <input type="number" id="cc-find-id" placeholder="Enter ID" />
+                </div>
+                <button class="btn-submit" onclick="findById(document.getElementById('cc-find-id').value)">Search</button>
+                <div class="find-result" id="find-result"></div>
+            </div>
+
+            <!-- UPDATE -->
+            <div class="form-pane" id="form-update">
+                <div class="form-group" style="max-width:300px;">
+                    <label>ID to Update</label>
+                    <input type="number" id="cc-upd-id" placeholder="Enter ID" />
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="cc-upd-title" placeholder="New title" />
+                    </div>
+                    <div class="form-group">
+                        <label>Difficulty</label>
+                        <select id="cc-upd-difficulty">
+                            <option value="EASY">EASY</option>
+                            <option value="MEDIUM">MEDIUM</option>
+                            <option value="HARD">HARD</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="cc-upd-desc" rows="3" placeholder="Updated description"></textarea>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Base Points</label>
+                        <input type="number" id="cc-upd-points" placeholder="e.g. 200" />
+                    </div>
+                    <div class="form-group">
+                        <label>Time Limit (ms)</label>
+                        <input type="number" id="cc-upd-timelimit" placeholder="e.g. 3000" />
+                    </div>
+                </div>
+                <div class="form-group" style="max-width:300px;">
+                    <label>Setter ID</label>
+                    <input type="number" id="cc-upd-setter" placeholder="e.g. 1" />
+                </div>
+                <button class="btn-submit" onclick="updateCodingChallenge()">Update Challenge</button>
+            </div>
+
+            <div class="response-box" id="response-box"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = "https://backendjavaa.onrender.com";
+        const ENTITY_URL = {
+            post:   "/auth/postchallenge",
+            getAll: "/auth/getchallenge",
+            getOne: "/auth/getchallenge/",
+            put:    "/auth/putchallenge/",
+            delete: "/auth/deletechallenge/"
+        };
+
+        async function authorizedFetch(url, options = {}) {
+            const token = localStorage.getItem("jwt_token");
+            if (!options.headers) options.headers = {};
+            if (token) options.headers["Authorization"] = "Bearer " + token;
+            return fetch(url, options);
+        }
+
+        window.onload = function () { requireAuth([ROLES.ADMIN, ROLES.PS]); };
+
+        function switchOp(mode, btn) {
+            document.querySelectorAll(".action-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".form-pane").forEach(p => p.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById("form-" + mode).classList.add("active");
+        }
+
+        function logout() { ccLogout(false); }
+
+        function showRes(message, isError) {
+            const el = document.getElementById("response-box");
+            el.className = "response-box " + (isError ? "error" : "success");
+            el.textContent = typeof message === "object" ? JSON.stringify(message, null, 2) : message;
+        }
+
+        async function fetchAll() {
+            const div = document.getElementById("table-container");
+            div.innerHTML = "<em>Loading...</em>";
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.getAll);
+                if (!res.ok) { div.innerHTML = "<span style='color:red;'>Error: " + res.status + "</span>"; return; }
+                const list = await res.json();
+                if (!list || list.length === 0) { div.innerHTML = "<div class='empty-state'>No records found.</div>"; return; }
+
+                let html = "<table><thead><tr>";
+                Object.keys(list[0]).forEach(k => { html += "<th>" + k.toUpperCase() + "</th>"; });
+                html += "<th>ACTIONS</th></tr></thead><tbody>";
+
+                list.forEach(row => {
+                    html += "<tr>";
+                    Object.values(row).forEach(v => {
+                        let display = (v !== null && v !== undefined) ? String(v) : "-";
+                        if (display.length > 30) display = display.substring(0, 30) + "...";
+                        html += "<td title='" + String(v) + "'>" + display + "</td>";
+                    });
+                    html += "<td>";
+                    html += "<button class='tbl-edit-btn' onclick='prefillUpdate(" + JSON.stringify(row).replace(/"/g, '&quot;') + ")'>✏️ Edit</button>";
+                    html += "<button class='tbl-delete-btn' onclick='deleteRecord(" + row.id + ")'>🗑️ Delete</button>";
+                    html += "</td></tr>";
+                });
+                html += "</tbody></table>";
+                div.innerHTML = html;
+            } catch (e) {
+                div.innerHTML = "<span style='color:red;'>Could not connect to server.</span>";
+            }
+        }
+
+        async function findById(id) {
+            const div = document.getElementById("find-result");
+            if (!id) { div.innerHTML = "<span style='color:red;'>Please enter a valid ID.</span>"; return; }
+            div.innerHTML = "<em>Searching...</em>";
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.getOne + id);
+                if (!res.ok) { div.innerHTML = "<span style='color:red;'>Record not found (Status: " + res.status + ")</span>"; return; }
+                const data = await res.json();
+
+                let html = "<div class='find-result-card'>";
+                html += "<h4>Found Record — ID: " + data.id + "</h4>";
+                html += "<table>";
+                Object.keys(data).forEach(k => {
+                    let val = data[k];
+                    if (val && typeof val === "object") val = JSON.stringify(val);
+                    html += "<tr><td>" + k.toUpperCase() + "</td><td>" + (val !== null && val !== undefined ? val : "-") + "</td></tr>";
+                });
+                html += "</table>";
+                html += "<div class='find-result-btns'>";
+                html += "<button class='btn-edit' onclick='prefillUpdate(" + JSON.stringify(data).replace(/"/g, '&quot;') + ")'>✏️ Edit This Record</button>";
+                html += "<button class='btn-delete' onclick='deleteRecord(" + data.id + ")'>🗑️ Delete This Record</button>";
+                html += "</div></div>";
+                div.innerHTML = html;
+            } catch (e) {
+                div.innerHTML = "<span style='color:red;'>Could not connect to server.</span>";
+            }
+        }
+
+        async function deleteRecord(id) {
+            if (!confirm("Are you sure you want to delete record ID " + id + "?")) return;
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.delete + id, { method: "DELETE" });
+                if (res.ok) {
+                    showRes("✅ Record ID " + id + " deleted successfully!", false);
+                    fetchAll();
+                } else {
+                    showRes("❌ Delete failed. Status: " + res.status, true);
+                }
+            } catch (e) {
+                showRes("❌ Could not connect to server.", true);
+            }
+        }
+
+        function prefillUpdate(data) {
+            document.getElementById("cc-upd-id").value         = data.id || "";
+            document.getElementById("cc-upd-title").value      = data.title || "";
+            document.getElementById("cc-upd-desc").value       = data.description || "";
+            document.getElementById("cc-upd-difficulty").value = data.difficulty || "EASY";
+            document.getElementById("cc-upd-points").value     = data.basePoints || "";
+            document.getElementById("cc-upd-timelimit").value  = data.timeLimitMs || "";
+            document.getElementById("cc-upd-setter").value     = data.setterId || "";
+            switchOp("update", document.getElementById("btn-update"));
+        }
+
+        async function addCodingChallenge() {
+            const body = {
+                id:          parseInt(document.getElementById("cc-add-id").value),
+                title:       document.getElementById("cc-add-title").value,
+                description: document.getElementById("cc-add-desc").value,
+                difficulty:  document.getElementById("cc-add-difficulty").value,
+                basePoints:  parseInt(document.getElementById("cc-add-points").value),
+                timeLimitMs: parseInt(document.getElementById("cc-add-timelimit").value),
+                setterId:    parseInt(document.getElementById("cc-add-setter").value)
+            };
+            try {
+                const r = await authorizedFetch(API + ENTITY_URL.post, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await r.json();
+                showRes(r.ok ? "✅ Challenge saved!\n" + JSON.stringify(data, null, 2) : "❌ Error: " + JSON.stringify(data, null, 2), !r.ok);
+            } catch (e) { showRes("❌ Could not connect to server.", true); }
+        }
+
+        async function updateCodingChallenge() {
+            const id = document.getElementById("cc-upd-id").value;
+            if (!id) { showRes("❌ ID is required.", true); return; }
+            const body = {
+                id:          parseInt(id),
+                title:       document.getElementById("cc-upd-title").value,
+                description: document.getElementById("cc-upd-desc").value,
+                difficulty:  document.getElementById("cc-upd-difficulty").value,
+                basePoints:  parseInt(document.getElementById("cc-upd-points").value),
+                timeLimitMs: parseInt(document.getElementById("cc-upd-timelimit").value),
+                setterId:    parseInt(document.getElementById("cc-upd-setter").value)
+            };
+            try {
+                const r = await authorizedFetch(API + ENTITY_URL.put + id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await r.json();
+                showRes(r.ok ? "✅ Challenge updated!\n" + JSON.stringify(data, null, 2) : "❌ Error: " + JSON.stringify(data, null, 2), !r.ok);
+            } catch (e) { showRes("❌ Could not connect to server.", true); }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════
+   CodeCrest — Auth Pages (Login & Register)
+   Theme: Dark Maroon (#7b1a2c) on white/light gray
+═══════════════════════════════════════════════════ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary:        #7b1a2c;
+    --primary-dark:   #5e1322;
+    --primary-light:  #f9eaec;
+    --primary-shadow: rgba(123, 26, 44, 0.22);
+    --border:         #e4e4e8;
+    --text:           #1a1a1e;
+    --text-secondary: #6b6b72;
+    --text-muted:     #adadb5;
+    --success:        #1a6b3c;
+    --error:          #d93025;
+    --font:           -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --radius:         10px;
+    --transition:     0.18s ease;
+}
+
+html { height: 100%; }
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(145deg, #f4f6f8 0%, #ede8ef 100%);
+    font-family: var(--font);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── PAGE WRAPPER ── */
+.page-wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 24px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* ── BRAND ── */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-icon {
+    font-size: 22px;
+    color: var(--primary);
+}
+
+.brand-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* ── CARD ── */
+.card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px 32px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+
+.card-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 5px;
+}
+
+.card-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 26px;
+}
+
+/* ── FIELD GROUP ── */
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.field-group label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.55px;
+}
+
+.field-group input,
+.field-group select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: var(--font);
+    color: var(--text);
+    background: #fff;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    appearance: none;
+}
+
+.field-group input::placeholder {
+    color: var(--text-muted);
+}
+
+.field-group input:focus,
+.field-group select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(123, 26, 44, 0.1);
+}
+
+/* ── SELECT DROPDOWN ARROW ── */
+.field-group select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b72' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+}
+
+/* ── MESSAGES ── */
+.msg {
+    font-size: 13px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.msg.error {
+    background-color: #fdf0ef;
+    border-left: 4px solid var(--error);
+    color: #a61c13;
+}
+
+.msg.success {
+    background-color: #edf7f1;
+    border-left: 4px solid var(--success);
+    color: #14502d;
+}
+
+/* ── PRIMARY BUTTON ── */
+.btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: opacity var(--transition), transform 0.12s ease, box-shadow var(--transition);
+    margin-top: 8px;
+    letter-spacing: 0.3px;
+    box-shadow: 0 3px 12px var(--primary-shadow);
+}
+
+.btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--primary-shadow);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px var(--primary-shadow);
+}
+
+.btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── SWITCH LINK ── */
+.switch-link {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 22px;
+}
+
+.switch-link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    transition: color var(--transition);
+}
+
+.switch-link a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 460px) {
+    .page-wrapper { padding: 20px 14px 32px; }
+    .card         { padding: 28px 22px 26px; }
+    .brand-name   { font-size: 20px; }
+}

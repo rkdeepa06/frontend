@@ -1,0 +1,262 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeCrest | Programming Contests</title>
+    <link rel="stylesheet" href="main.css">
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 CodeCrest | Programming Contests</h1>
+        <div class="header-right">
+            <a class="back-btn" href="dashboard.html">← Back to Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="page-title-bar">
+        Managing: <span>Programming Contests</span>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <h3>🏅 Programming Contests</h3>
+            <div class="ops-row">
+                <button class="action-btn active" id="btn-add" onclick="switchOp('add', this)">➕ Add Contest</button>
+                <button class="action-btn" id="btn-all" onclick="switchOp('all', this); fetchAll()">📋 View All</button>
+                <button class="action-btn" id="btn-find" onclick="switchOp('find', this)">🔍 Find by ID</button>
+                <button class="action-btn" id="btn-update" onclick="switchOp('update', this)">✏️ Update</button>
+            </div>
+
+            <!-- ADD -->
+            <div class="form-pane active" id="form-add">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>ID</label>
+                        <input type="number" id="pc-add-id" placeholder="Enter ID" />
+                    </div>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="pc-add-title" placeholder="e.g. CodeCrest Round 1" />
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="text" id="pc-add-start" placeholder="e.g. 2026-07-01T10:00:00" />
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="text" id="pc-add-end" placeholder="e.g. 2026-07-01T13:00:00" />
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Capacity</label>
+                        <input type="number" id="pc-add-capacity" placeholder="e.g. 100" />
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="pc-add-status">
+                            <option value="UPCOMING">UPCOMING</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-submit" onclick="addProgrammingContest()">Save Contest</button>
+            </div>
+
+            <!-- VIEW ALL -->
+            <div class="form-pane" id="form-all">
+                <div id="table-container"><div class="empty-state">Click "View All" to load data.</div></div>
+            </div>
+
+            <!-- FIND BY ID -->
+            <div class="form-pane" id="form-find">
+                <div class="form-group" style="max-width:300px;">
+                    <label>Contest ID</label>
+                    <input type="number" id="pc-find-id" placeholder="Enter ID" />
+                </div>
+                <button class="btn-submit" onclick="findById(document.getElementById('pc-find-id').value)">Search</button>
+                <div class="find-result" id="find-result"></div>
+            </div>
+
+            <!-- UPDATE -->
+            <div class="form-pane" id="form-update">
+                <div class="form-group" style="max-width:300px;">
+                    <label>ID to Update</label>
+                    <input type="number" id="pc-upd-id" placeholder="Enter ID" />
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="pc-upd-title" placeholder="New title" />
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="pc-upd-status">
+                            <option value="UPCOMING">UPCOMING</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="text" id="pc-upd-start" placeholder="2026-07-01T10:00:00" />
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="text" id="pc-upd-end" placeholder="2026-07-01T13:00:00" />
+                    </div>
+                </div>
+                <div class="form-group" style="max-width:300px;">
+                    <label>Capacity</label>
+                    <input type="number" id="pc-upd-capacity" placeholder="e.g. 150" />
+                </div>
+                <button class="btn-submit" onclick="updateProgrammingContest()">Update Contest</button>
+            </div>
+
+            <div class="response-box" id="response-box"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = "https://backendjavaa.onrender.com";
+        const ENTITY_URL = {
+            post:   "/auth/postcontest",
+            getAll: "/auth/getcontest",
+            getOne: "/auth/getcontest/",
+            put:    "/auth/putcontest/",
+            delete: "/auth/deletecontest/"
+        };
+
+        async function authorizedFetch(url, options = {}) {
+            const token = localStorage.getItem("jwt_token");
+            if (!options.headers) options.headers = {};
+            if (token) options.headers["Authorization"] = "Bearer " + token;
+            return fetch(url, options);
+        }
+
+        window.onload = function () { requireAuth([ROLES.ADMIN, ROLES.PS]); };
+
+        function switchOp(mode, btn) {
+            document.querySelectorAll(".action-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".form-pane").forEach(p => p.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById("form-" + mode).classList.add("active");
+        }
+
+        function logout() { ccLogout(false); }
+
+        function showRes(message, isError) {
+            const el = document.getElementById("response-box");
+            el.className = "response-box " + (isError ? "error" : "success");
+            el.textContent = typeof message === "object" ? JSON.stringify(message, null, 2) : message;
+        }
+
+        async function fetchAll() {
+            const div = document.getElementById("table-container");
+            div.innerHTML = "<em>Loading...</em>";
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.getAll);
+                if (!res.ok) { div.innerHTML = "<span style='color:red;'>Error: " + res.status + "</span>"; return; }
+                const list = await res.json();
+                if (!list || list.length === 0) { div.innerHTML = "<div class='empty-state'>No records found.</div>"; return; }
+                let html = "<table><thead><tr>";
+                Object.keys(list[0]).forEach(k => { html += "<th>" + k.toUpperCase() + "</th>"; });
+                html += "<th>ACTIONS</th></tr></thead><tbody>";
+                list.forEach(row => {
+                    html += "<tr>";
+                    Object.values(row).forEach(v => {
+                        let display = (v !== null && v !== undefined) ? String(v) : "-";
+                        if (display.length > 30) display = display.substring(0, 30) + "...";
+                        html += "<td title='" + String(v) + "'>" + display + "</td>";
+                    });
+                    html += "<td><button class='tbl-edit-btn' onclick='prefillUpdate(" + JSON.stringify(row).replace(/"/g, '&quot;') + ")'>✏️ Edit</button><button class='tbl-delete-btn' onclick='deleteRecord(" + row.id + ")'>🗑️ Delete</button></td></tr>";
+                });
+                html += "</tbody></table>";
+                div.innerHTML = html;
+            } catch (e) { div.innerHTML = "<span style='color:red;'>Could not connect to server.</span>"; }
+        }
+
+        async function findById(id) {
+            const div = document.getElementById("find-result");
+            if (!id) { div.innerHTML = "<span style='color:red;'>Please enter a valid ID.</span>"; return; }
+            div.innerHTML = "<em>Searching...</em>";
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.getOne + id);
+                if (!res.ok) { div.innerHTML = "<span style='color:red;'>Record not found (Status: " + res.status + ")</span>"; return; }
+                const data = await res.json();
+                let html = "<div class='find-result-card'><h4>Found Record — ID: " + data.id + "</h4><table>";
+                Object.keys(data).forEach(k => {
+                    let val = data[k];
+                    if (val && typeof val === "object") val = JSON.stringify(val);
+                    html += "<tr><td>" + k.toUpperCase() + "</td><td>" + (val !== null && val !== undefined ? val : "-") + "</td></tr>";
+                });
+                html += "</table><div class='find-result-btns'><button class='btn-edit' onclick='prefillUpdate(" + JSON.stringify(data).replace(/"/g, '&quot;') + ")'>✏️ Edit This Record</button><button class='btn-delete' onclick='deleteRecord(" + data.id + ")'>🗑️ Delete This Record</button></div></div>";
+                div.innerHTML = html;
+            } catch (e) { div.innerHTML = "<span style='color:red;'>Could not connect to server.</span>"; }
+        }
+
+        async function deleteRecord(id) {
+            if (!confirm("Are you sure you want to delete record ID " + id + "?")) return;
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.delete + id, { method: "DELETE" });
+                if (res.ok) { showRes("✅ Record ID " + id + " deleted successfully!", false); fetchAll(); }
+                else showRes("❌ Delete failed. Status: " + res.status, true);
+            } catch (e) { showRes("❌ Could not connect to server.", true); }
+        }
+
+        function prefillUpdate(data) {
+            document.getElementById("pc-upd-id").value       = data.id || "";
+            document.getElementById("pc-upd-title").value    = data.title || "";
+            document.getElementById("pc-upd-start").value    = data.startTime || "";
+            document.getElementById("pc-upd-end").value      = data.endTime || "";
+            document.getElementById("pc-upd-capacity").value = data.capacity || "";
+            document.getElementById("pc-upd-status").value   = data.status || "UPCOMING";
+            switchOp("update", document.getElementById("btn-update"));
+        }
+
+        async function addProgrammingContest() {
+            const body = {
+                id:        parseInt(document.getElementById("pc-add-id").value),
+                title:     document.getElementById("pc-add-title").value,
+                startTime: document.getElementById("pc-add-start").value,
+                endTime:   document.getElementById("pc-add-end").value,
+                capacity:  parseInt(document.getElementById("pc-add-capacity").value),
+                status:    document.getElementById("pc-add-status").value
+            };
+            try {
+                const r = await authorizedFetch(API + ENTITY_URL.post, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await r.json();
+                showRes(r.ok ? "✅ Contest saved!\n" + JSON.stringify(data, null, 2) : "❌ Error: " + JSON.stringify(data, null, 2), !r.ok);
+            } catch (e) { showRes("❌ Could not connect to server.", true); }
+        }
+
+        async function updateProgrammingContest() {
+            const id = document.getElementById("pc-upd-id").value;
+            if (!id) { showRes("❌ ID is required.", true); return; }
+            const body = {
+                id:        parseInt(id),
+                title:     document.getElementById("pc-upd-title").value,
+                startTime: document.getElementById("pc-upd-start").value,
+                endTime:   document.getElementById("pc-upd-end").value,
+                capacity:  parseInt(document.getElementById("pc-upd-capacity").value),
+                status:    document.getElementById("pc-upd-status").value
+            };
+            try {
+                const r = await authorizedFetch(API + ENTITY_URL.put + id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await r.json();
+                showRes(r.ok ? "✅ Contest updated!\n" + JSON.stringify(data, null, 2) : "❌ Error: " + JSON.stringify(data, null, 2), !r.ok);
+            } catch (e) { showRes("❌ Could not connect to server.", true); }
+        }
+    </script>
+
+</body>
+</html>

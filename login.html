@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeCrest — Login</title>
+    <link rel="stylesheet" href="auth.css">
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <div class="brand">
+        <span class="brand-icon">&#9650;</span>
+        <span class="brand-name">CodeCrest</span>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">Welcome back</h2>
+        <p class="card-sub">Login to your CodeCrest account</p>
+
+        <form id="login-form">
+
+            <div class="field-group">
+                <label for="login-username">Username</label>
+                <input
+                    type="text"
+                    id="login-username"
+                    name="username"
+                    placeholder="Enter your username"
+                    required
+                    autocomplete="username"
+                />
+            </div>
+
+            <div class="field-group">
+                <label for="login-password">Password</label>
+                <input
+                    type="password"
+                    id="login-password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                />
+            </div>
+
+            <div id="login-error" class="msg error" style="display:none;"></div>
+            <div id="login-success" class="msg success" style="display:none;"></div>
+
+            <button type="submit" id="login-btn" class="btn-primary">
+                Login
+            </button>
+
+        </form>
+
+        <p class="switch-link">
+            Don't have an account?
+            <a href="register.html">Register here</a>
+        </p>
+    </div>
+
+</div>
+
+<script>
+const API_BASE = "https://backendjavaa.onrender.com";
+
+
+document.getElementById("login-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    const errorDiv   = document.getElementById("login-error");
+    const successDiv = document.getElementById("login-success");
+    const btn        = document.getElementById("login-btn");
+
+    errorDiv.style.display   = "none";
+    successDiv.style.display = "none";
+
+    if (!username || !password) {
+        errorDiv.textContent   = "Please fill in all fields.";
+        errorDiv.style.display = "block";
+        return;
+    }
+
+    btn.textContent = "Logging in...";
+    btn.disabled    = true;
+
+    try {
+        const res = await fetch(API_BASE + "/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorDiv.textContent   = data.message || "Invalid username or password.";
+            errorDiv.style.display = "block";
+            return;
+        }
+
+        const normalizedRole = ccNormalizeRole(data.role);
+        localStorage.setItem("jwt_token",  data.token);
+        localStorage.setItem("username",   username);
+        localStorage.setItem("role",       normalizedRole);
+
+        /* Role-based redirect */
+        let dest = "../manage/dashboard.html"; // default: admin
+        if (normalizedRole === ROLES.PS)         dest = "../manage/dashboard_problemsetter.html";
+        if (normalizedRole === ROLES.CONTESTANT) dest = "../manage/dashboard_contestant.html";
+
+        successDiv.textContent   = "Login successful! Redirecting...";
+        successDiv.style.display = "block";
+
+        setTimeout(() => {
+            window.location.href = dest;
+        }, 1000);
+
+    } catch (err) {
+        errorDiv.textContent   = "Cannot connect to server. Make sure backend is running on port 8080.";
+        errorDiv.style.display = "block";
+    } finally {
+        btn.textContent = "Login";
+        btn.disabled    = false;
+    }
+});
+</script>
+
+</body>
+</html>

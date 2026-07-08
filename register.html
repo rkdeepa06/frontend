@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeCrest — Register</title>
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <div class="brand">
+        <span class="brand-icon">&#9650;</span>
+        <span class="brand-name">CodeCrest</span>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">Create account</h2>
+        <p class="card-sub">Join CodeCrest and start competing</p>
+<p style="text-align:center; color:gray; font-size:14px;">
+    Register to participate in coding contests, solve challenges,
+    and climb the global leaderboard.
+</p>
+        <form id="register-form">
+
+            <div class="field-group">
+                <label for="reg-username">Username</label>
+                <input
+                    type="text"
+                    id="reg-username"
+                    name="username"
+                    placeholder="Choose a username"
+                    required
+                    autocomplete="username"
+                />
+            </div>
+
+
+            <div class="field-group">
+                <label for="reg-password">Password</label>
+                <input
+                    type="password"
+                    id="reg-password"
+                    name="password"
+                    placeholder="At least 6 characters"
+                    required
+                    autocomplete="new-password"
+                />
+            </div>
+
+            <div class="field-group">
+                <label for="reg-role">Role</label>
+                <select id="reg-role" name="role">
+                    <option value="ROLE_CONTESTANT">Contestant</option>
+                    <option value="ROLE_PROBLEM_SETTER">Problem Setter</option>
+                    <option value="ROLE_PLATFORM_ADMIN">Platform Admin</option>
+                </select>
+            </div>
+<p style="font-size:13px; color:#666; margin-top:5px;">
+    ✔ Password should be at least 6 characters long.
+</p>
+            <div id="reg-error"   class="msg error"   style="display:none;"></div>
+            <div id="reg-success" class="msg success" style="display:none;"></div>
+
+            <button type="submit" id="reg-btn" class="btn-primary">
+                Register
+            </button>
+
+        </form>
+
+        <p class="switch-link">
+            Already have an account?
+            <a href="login.html">Login here</a>
+        </p>
+    </div>
+
+</div>
+
+<script>
+const API_BASE = "https://backendjavaa.onrender.com";
+
+document.getElementById("register-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const username = document.getElementById("reg-username").value.trim();
+    const password = document.getElementById("reg-password").value;
+    const role     = document.getElementById("reg-role").value;
+
+    const errDiv = document.getElementById("reg-error");
+    const sucDiv = document.getElementById("reg-success");
+    const btn    = document.getElementById("reg-btn");
+
+    errDiv.style.display = "none";
+    sucDiv.style.display = "none";
+
+    if (!username || !password) {
+        errDiv.textContent   = "Please fill in all required fields.";
+        errDiv.style.display = "block";
+        return;
+    }
+
+    if (password.length < 6) {
+        errDiv.textContent   = "Password must be at least 6 characters.";
+        errDiv.style.display = "block";
+        return;
+    }
+
+    btn.textContent = "Registering...";
+    btn.disabled    = true;
+
+    try {
+        const res = await fetch(API_BASE + "/auth/postuser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password, role })
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            errDiv.textContent   = "Registration failed: " + errorText;
+            errDiv.style.display = "block";
+            return;
+        }
+
+        const data = await res.json();
+
+        sucDiv.textContent   = "Account created! Redirecting to login...";
+        sucDiv.style.display = "block";
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1500);
+
+    } catch (err) {
+        errDiv.textContent   = "Cannot connect to server. Make sure backend is running on port 8080.";
+        errDiv.style.display = "block";
+    } finally {
+        btn.textContent = "Register";
+        btn.disabled    = false;
+    }
+});
+</script>
+
+</body>
+</html>

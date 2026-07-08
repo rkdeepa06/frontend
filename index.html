@@ -1,0 +1,535 @@
+<html>
+    <head>
+        <title>TASK</title>
+    </head>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f6f8;
+            color: #1a1a1e;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── NAV ── */
+        .nav {
+            background: linear-gradient(135deg, #7b1a2c 0%, #5e1322 100%);
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-shadow: 0 2px 14px rgba(123, 26, 44, 0.22);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav h2 {
+            background: transparent;
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .nav h1 {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 14px;
+            font-weight: 400;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+            letter-spacing: 0.4px;
+        }
+
+        /* ── GLOBAL ── */
+        p {
+            font-size: 15px;
+            line-height: 1.75;
+            color: #3a3a42;
+            margin-bottom: 14px;
+        }
+
+        /* ── HERO ── */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 56px 40px;
+            max-width: 1120px;
+            margin: 0 auto;
+            gap: 48px;
+        }
+
+        .content { width: 50%; }
+
+        .content h2 {
+            font-size: 19px;
+            font-weight: 700;
+            color: #7b1a2c;
+            margin-bottom: 18px;
+            border-left: 4px solid #7b1a2c;
+            padding-left: 14px;
+            background: transparent;
+        }
+
+        .image { width: 46%; text-align: center; }
+
+        .image img {
+            width: 100%;
+            max-width: 560px;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.12);
+            display: block;
+        }
+
+        /* ── FEATURES ── */
+        .features {
+            padding: 50px 40px;
+            background: #fff;
+            border-top: 1px solid #e4e4e8;
+        }
+
+        .features h2 {
+            text-align: center;
+            color: #7b1a2c;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            background: transparent;
+        }
+
+        .feature-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .card {
+            width: 220px;
+            padding: 24px 20px;
+            background: white;
+            border-radius: 12px;
+            border: 1.5px solid #e4e4e8;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            text-align: center;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: #7b1a2c;
+            box-shadow: 0 6px 22px rgba(123,26,44,0.12);
+            transform: translateY(-3px);
+        }
+
+        .card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a1e;
+            margin-bottom: 8px;
+            background: transparent;
+        }
+
+        .card p { background: transparent; margin-bottom: 0; }
+
+        /* ── STATISTICS ── */
+        .statistics {
+            padding: 50px 40px;
+            background: #f9eaec;
+            border-top: 1px solid #f0c4cc;
+        }
+
+        .statistics h2 {
+            text-align: center;
+            color: #7b1a2c;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: transparent;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .stat-box {
+            width: 190px;
+            padding: 24px 16px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e4e4e8;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .stat-box h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #7b1a2c;
+            background: transparent;
+            margin-bottom: 6px;
+        }
+
+        .stat-box p { background: transparent; font-size: 13px; margin-bottom: 0; }
+
+        /* ── WORKFLOW ── */
+        .workflow {
+            padding: 56px 40px;
+            background: #ffffff;
+            border-top: 1px solid #e4e4e8;
+        }
+
+        .workflow h2 {
+            text-align: center;
+            color: #7b1a2c;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 44px;
+            background: transparent;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 36px 0;
+        }
+
+        .left  { justify-content: flex-start; }
+        .right { justify-content: flex-end; }
+
+        .circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7b1a2c, #5e1322);
+            color: white;
+            font-size: 24px;
+            font-weight: 800;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(123,26,44,0.28);
+        }
+
+        .box {
+            width: 480px;
+            background: white;
+            padding: 22px 24px;
+            margin: 0 20px;
+            border-radius: 12px;
+            border: 1px solid #e4e4e8;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+
+        .box h3 {
+            color: #7b1a2c;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .box p { background: transparent; margin-bottom: 0; font-size: 14px; }
+
+        /* ── CONTACT ── */
+        .contact {
+            padding: 50px 40px;
+            background: #f4f6f8;
+            border-top: 1px solid #e4e4e8;
+        }
+
+        .contact h2 {
+            text-align: center;
+            color: #7b1a2c;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: transparent;
+        }
+
+        .contact p { text-align: center; }
+
+        .contact table {
+            margin-top: 24px;
+            border-collapse: collapse;
+        }
+
+        .contact td {
+            padding: 10px 18px;
+            font-size: 14px;
+            border-bottom: 1px solid #e4e4e8;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            background: #1a1a1e;
+            color: #d0d0d8;
+            text-align: center;
+            padding: 36px 24px;
+        }
+
+        .footer p,
+        .footer nav,
+        .footer a {
+            background: transparent;
+            color: #d0d0d8;
+        }
+
+        .footer a {
+            text-decoration: none;
+            margin: 0 14px;
+            font-size: 13px;
+            transition: color 0.18s ease;
+        }
+
+        .footer a:hover { color: #ffffff; text-decoration: underline; }
+
+        .foot {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+        }
+
+        /* ── BOTTOM NAV (in .foot div) ── */
+        nav {
+            display: flex;
+            gap: 14px;
+        }
+
+        nav a {
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #7b1a2c;
+            padding: 9px 20px;
+            border-radius: 8px;
+            border: 1.5px solid #e4e4e8;
+            background: #ffffff;
+            transition: all 0.18s ease;
+        }
+
+        nav a:hover {
+            background-color: #7b1a2c;
+            color: #ffffff;
+            border-color: #7b1a2c;
+            box-shadow: 0 2px 10px rgba(123, 26, 44, 0.22);
+            transform: translateY(-1px);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .nav       { padding: 0 20px; height: 62px; }
+            .nav h1    { display: none; }
+            .container { flex-direction: column; padding: 36px 20px; gap: 28px; }
+            .content   { width: 100%; }
+            .image     { width: 100%; }
+            .features, .statistics, .workflow, .contact { padding: 36px 20px; }
+            .box       { width: 100%; }
+            nav        { gap: 10px; }
+            nav a      { padding: 8px 14px; }
+        }
+    </style>
+
+    <body>
+        <div class="nav">
+<h2>CodeCrest</h2>
+<h1>Competitive Programming & Leaderboard Platform</h1>
+        </div>
+
+<div class="container">
+        <div class="content">
+            <h2>About us:</h2>
+        <p>CodeCrest is a competitive programming platform where students, problem setters, and admins can manage coding challenges, contests, and rankings. It helps contestants practice algorithmic problems and track their progress on a global leaderboard.</p>
+        <p>
+Users can solve coding challenges of different difficulty levels and submit their source code for evaluation. Each submission gets an instant verdict such as Accepted or Wrong Answer, along with points based on difficulty and time taken.
+</p>
+<p>
+One of the key features of CodeCrest is its contest system. Users can enroll in scheduled programming contests within a fixed time window and compete with other contestants in real time.
+</p>
+<p>
+The platform also includes a leaderboard that shows the global rank of every contestant based on total points, as well as a contest-specific leaderboard based on score and penalty time.
+</p>
+</div>
+<div class="image">
+    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=700"></img>
+</div>
+</div>
+
+<br><br>
+<hr>
+
+<section class="features">
+
+    <h2 align="center">Our Features</h2>
+
+    <div class="feature-container">
+
+        <div class="card">
+            <h3>💻 Coding Challenges</h3>
+            <p>Solve coding problems from beginner to advanced levels with instant evaluation.</p>
+        </div>
+
+        <div class="card">
+            <h3>🏆 Live Contests</h3>
+            <p>Participate in real-time programming contests and compete globally.</p>
+        </div>
+
+        <div class="card">
+            <h3>📊 Leaderboard</h3>
+            <p>Track your rankings, scores, and overall coding performance.</p>
+        </div>
+
+        <div class="card">
+            <h3>⚡ Instant Evaluation</h3>
+            <p>Receive immediate verdicts and detailed submission reports.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<br><hr><br>
+
+<section class="statistics">
+
+<h2 align="center">Platform Statistics</h2>
+
+<div class="stats-container">
+
+    <div class="stat-box">
+        <h2>10K+</h2>
+        <p>Registered Users</p>
+    </div>
+
+    <div class="stat-box">
+        <h2>1500+</h2>
+        <p>Coding Problems</p>
+    </div>
+
+    <div class="stat-box">
+        <h2>250+</h2>
+        <p>Programming Contests</p>
+    </div>
+
+    <div class="stat-box">
+        <h2>99%</h2>
+        <p>Successful Submissions</p>
+    </div>
+
+</div>
+
+</section>
+
+<br><hr><br>
+<section class="workflow">
+
+    <h2>How CodeCrest Works</h2>
+
+    <div class="step left">
+        <div class="circle">1</div>
+
+        <div class="box">
+            <h3>Create Account</h3>
+            <p>Create your CodeCrest account to access coding challenges and contests.</p>
+        </div>
+    </div>
+
+    <div class="step right">
+
+        <div class="box">
+            <h3>Login Securely</h3>
+            <p>Login using your registered username and password.</p>
+        </div>
+
+        <div class="circle">2</div>
+    </div>
+
+    <div class="step left">
+        <div class="circle">3</div>
+
+        <div class="box">
+            <h3>Solve Challenges</h3>
+            <p>Practice coding problems and receive instant evaluation.</p>
+        </div>
+    </div>
+
+    <div class="step right">
+
+        <div class="box">
+            <h3>Climb the Leaderboard</h3>
+            <p>Earn points, improve your ranking and compete globally.</p>
+        </div>
+
+        <div class="circle">4</div>
+    </div>
+
+</section>
+<section class="contact">
+
+    <h2 align="center">Contact Us</h2>
+
+    <p align="center">
+        Have questions or need assistance? Our team is here to help you.
+    </p>
+
+    <table align="center" cellpadding="10">
+        <tr>
+            <td><strong>Email:</strong></td>
+            <td>support@codecrest.com</td>
+        </tr>
+        <tr>
+            <td><strong>Phone:</strong></td>
+            <td>+91 98765 43210</td>
+        </tr>
+        <tr>
+            <td><strong>Location:</strong></td>
+            <td>Coimbatore, Tamil Nadu, India</td>
+        </tr>
+    </table>
+
+</section>
+
+<br><hr><br>
+
+<footer class="footer">
+
+    <nav class="foot">
+        <a href="index.html">Home</a>
+        <a href="register.html">Register</a>
+        <a href="login.html">Login</a>
+    </nav>
+
+    <br>
+
+    <p><strong>CodeCrest</strong></p>
+    <p>Competitive Programming & Leaderboard Platform</p>
+
+    <p>
+        Empowering programmers to practice, compete, and improve through
+        coding challenges and live contests.
+    </p>
+
+    <p>© 2026 CodeCrest. All Rights Reserved.</p>
+
+</footer>
+    </body>
+</html>

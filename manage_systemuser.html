@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeCrest | System Users</title>
+    <link rel="stylesheet" href="main.css">
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 CodeCrest | System Users</h1>
+        <div class="header-right">
+            <a class="back-btn" href="dashboard.html">← Back to Dashboard</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="page-title-bar">
+        Managing: <span>System Users</span>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <h3>👤 System Users</h3>
+            <div class="ops-row">
+                <button class="action-btn active" id="btn-add" onclick="switchOp('add', this)">➕ Add User</button>
+                <button class="action-btn" id="btn-all" onclick="switchOp('all', this); fetchAll()">📋 View All</button>
+                <button class="action-btn" id="btn-find" onclick="switchOp('find', this)">🔍 Find by ID</button>
+                <button class="action-btn" id="btn-update" onclick="switchOp('update', this)">✏️ Update</button>
+            </div>
+
+            <!-- ADD -->
+            <div class="form-pane active" id="form-add">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>ID</label>
+                        <input type="number" id="su-add-id" placeholder="Enter ID (e.g. 1)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="su-add-username" placeholder="e.g. rkd" />
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="su-add-password" placeholder="Min 4 characters" />
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <input type="text" id="su-add-role" placeholder="e.g. CONTESTANT or ADMIN" />
+                    </div>
+                </div>
+                <button class="btn-submit" onclick="addSystemUser()">Save User</button>
+            </div>
+
+            <!-- VIEW ALL -->
+            <div class="form-pane" id="form-all">
+                <div id="table-container"><div class="empty-state">Click "View All" to load data.</div></div>
+            </div>
+
+            <!-- FIND BY ID -->
+            <div class="form-pane" id="form-find">
+                <div class="form-group" style="max-width:300px;">
+                    <label>User ID</label>
+                    <input type="number" id="su-find-id" placeholder="Enter ID to search" />
+                </div>
+                <button class="btn-submit" onclick="findById(document.getElementById('su-find-id').value)">Search</button>
+                <div class="find-result" id="find-result"></div>
+            </div>
+
+            <!-- UPDATE -->
+            <div class="form-pane" id="form-update">
+                <div class="form-group" style="max-width:300px;">
+                    <label>ID to Update</label>
+                    <input type="number" id="su-upd-id" placeholder="Enter ID" />
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="su-upd-username" placeholder="New username" />
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="su-upd-password" placeholder="New password" />
+                    </div>
+                </div>
+                <div class="form-group" style="max-width:300px;">
+                    <label>Role</label>
+                    <input type="text" id="su-upd-role" placeholder="e.g. ADMIN" />
+                </div>
+                <button class="btn-submit" onclick="updateSystemUser()">Update User</button>
+            </div>
+
+            <div class="response-box" id="response-box"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = "https://backendjavaa.onrender.com";
+        const ENTITY_URL = {
+            post:   "/auth/postuser",
+            getAll: "/auth/getuser",
+            getOne: "/auth/getuser/",
+            put:    "/auth/putuser/",
+            delete: "/auth/deleteuser/"
+        };
+
+        async function authorizedFetch(url, options = {}) {
+            const token = localStorage.getItem("jwt_token");
+            if (!options.headers) options.headers = {};
+            if (token) options.headers["Authorization"] = "Bearer " + token;
+            return fetch(url, options);
+        }
+
+        window.onload = function () { requireAuth([ROLES.ADMIN]); };
+
+        function switchOp(mode, btn) {
+            document.querySelectorAll(".action-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".form-pane").forEach(p => p.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById("form-" + mode).classList.add("active");
+        }
+
+        function logout() { ccLogout(false); }
+
+        function showRes(message, isError) {
+            const el = document.getElementById("response-box");
+            el.className = "response-box " + (isError ? "error" : "success");
+            el.textContent = typeof message === "object" ? JSON.stringify(message, null, 2) : message;
+        }
+
+        async function fetchAll() {
+            const div = document.getElementById("table-container");
+            div.innerHTML = "<em>Loading...</em>";
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.getAll);
+                if (!res.ok) { div.innerHTML = "<span style='color:red;'>Error: " + res.status + "</span>"; return; }
+                const list = await res.json();
+                if (!list || list.length === 0) { div.innerHTML = "<div class='empty-state'>No records found.</div>"; return; }
+
+                let html = "<table><thead><tr>";
+                Object.keys(list[0]).forEach(k => { html += "<th>" + k.toUpperCase() + "</th>"; });
+                html += "<th>ACTIONS</th></tr></thead><tbody>";
+
+                list.forEach(row => {
+                    html += "<tr>";
+                    Object.values(row).forEach(v => {
+                        let display = (v !== null && v !== undefined) ? String(v) : "-";
+                        if (display.length > 30) display = display.substring(0, 30) + "...";
+                        html += "<td title='" + String(v) + "'>" + display + "</td>";
+                    });
+                    html += "<td>";
+                    html += "<button class='tbl-edit-btn' onclick='prefillUpdate(" + JSON.stringify(row).replace(/"/g, '&quot;') + ")'>✏️ Edit</button>";
+                    html += "<button class='tbl-delete-btn' onclick='deleteRecord(" + row.id + ")'>🗑️ Delete</button>";
+                    html += "</td></tr>";
+                });
+                html += "</tbody></table>";
+                div.innerHTML = html;
+            } catch (e) {
+                div.innerHTML = "<span style='color:red;'>Could not connect to server.</span>";
+            }
+        }
+
+        async function findById(id) {
+            const div = document.getElementById("find-result");
+            if (!id) { div.innerHTML = "<span style='color:red;'>Please enter a valid ID.</span>"; return; }
+            div.innerHTML = "<em>Searching...</em>";
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.getOne + id);
+                if (!res.ok) { div.innerHTML = "<span style='color:red;'>Record not found (Status: " + res.status + ")</span>"; return; }
+                const data = await res.json();
+
+                let html = "<div class='find-result-card'>";
+                html += "<h4>Found Record — ID: " + data.id + "</h4>";
+                html += "<table>";
+                Object.keys(data).forEach(k => {
+                    let val = data[k];
+                    if (val && typeof val === "object") val = JSON.stringify(val);
+                    html += "<tr><td>" + k.toUpperCase() + "</td><td>" + (val !== null && val !== undefined ? val : "-") + "</td></tr>";
+                });
+                html += "</table>";
+                html += "<div class='find-result-btns'>";
+                html += "<button class='btn-edit' onclick='prefillUpdate(" + JSON.stringify(data).replace(/"/g, '&quot;') + ")'>✏️ Edit This Record</button>";
+                html += "<button class='btn-delete' onclick='deleteRecord(" + data.id + ")'>🗑️ Delete This Record</button>";
+                html += "</div></div>";
+                div.innerHTML = html;
+            } catch (e) {
+                div.innerHTML = "<span style='color:red;'>Could not connect to server.</span>";
+            }
+        }
+
+        async function deleteRecord(id) {
+            if (!confirm("Are you sure you want to delete record ID " + id + "?")) return;
+            try {
+                const res = await authorizedFetch(API + ENTITY_URL.delete + id, { method: "DELETE" });
+                if (res.ok) {
+                    showRes("✅ Record ID " + id + " deleted successfully!", false);
+                    fetchAll();
+                } else {
+                    showRes("❌ Delete failed. Status: " + res.status, true);
+                }
+            } catch (e) {
+                showRes("❌ Could not connect to server.", true);
+            }
+        }
+
+        function prefillUpdate(data) {
+            document.getElementById("su-upd-id").value       = data.id || "";
+            document.getElementById("su-upd-username").value = data.username || "";
+            document.getElementById("su-upd-password").value = data.password || "";
+            document.getElementById("su-upd-role").value     = data.role || "";
+            const updateBtn = document.getElementById("btn-update");
+            switchOp("update", updateBtn);
+        }
+
+        async function addSystemUser() {
+            const body = {
+                id:       parseInt(document.getElementById("su-add-id").value),
+                username: document.getElementById("su-add-username").value,
+                password: document.getElementById("su-add-password").value,
+                role:     ccNormalizeRole(document.getElementById("su-add-role").value)
+            };
+            try {
+                const r = await authorizedFetch(API + ENTITY_URL.post, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await r.json();
+                showRes(r.ok ? "✅ User saved!\n" + JSON.stringify(data, null, 2) : "❌ Error: " + JSON.stringify(data, null, 2), !r.ok);
+            } catch (e) { showRes("❌ Could not connect to server.", true); }
+        }
+
+        async function updateSystemUser() {
+            const id = document.getElementById("su-upd-id").value;
+            if (!id) { showRes("❌ ID is required.", true); return; }
+            const body = {
+                id:       parseInt(id),
+                username: document.getElementById("su-upd-username").value,
+                password: document.getElementById("su-upd-password").value,
+                role:     ccNormalizeRole(document.getElementById("su-upd-role").value)
+            };
+            try {
+                const r = await authorizedFetch(API + ENTITY_URL.put + id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await r.json();
+                showRes(r.ok ? "✅ User updated!\n" + JSON.stringify(data, null, 2) : "❌ Error: " + JSON.stringify(data, null, 2), !r.ok);
+            } catch (e) { showRes("❌ Could not connect to server.", true); }
+        }
+    </script>
+
+</body>
+</html>
