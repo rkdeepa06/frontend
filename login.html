@@ -111,8 +111,8 @@ document.getElementById("login-form").addEventListener("submit", async function 
 
         /* Role-based redirect */
         let dest = "../manage/dashboard.html"; // default: admin
-        if (normalizedRole === ROLES.PS)         dest = "../manage/dashboard_problemsetter.html";
-        if (normalizedRole === ROLES.CONTESTANT) dest = "../manage/dashboard_contestant.html";
+        if (normalizedRole === ROLES.PS)         dest = "dashboard_problemsetter.html";
+        if (normalizedRole === ROLES.CONTESTANT) dest = "dashboard_contestant.html";
 
         successDiv.textContent   = "Login successful! Redirecting...";
         successDiv.style.display = "block";
